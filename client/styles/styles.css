@@ -66,6 +66,10 @@ form input[type=text] {
 }
 
 .chat .username {
+    font-weight: 500;
+}
+
+.chat .friend {
     font-weight: 800;
 }
 

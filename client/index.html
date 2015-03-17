@@ -10,13 +10,17 @@
     <script src="bower_components/underscore/underscore-min.js"></script>
     <!-- your scripts -->
     <script src="env/config.js"></script>
+    <script src="../lib/html-css-sanitizer-minified.js"></script>
     <script src="scripts/app.js"></script>
   </head>
   <body>
     <div id="main">
       <h1>chatterbox</h1>
       <form id="form" action="javascript:app.submit()">
-        Message: <input class="text" type="text"><input type="submit" value="Send">
+        Message: <input class="postfield" type="text"><input type="submit" value="Send">
+      </form>
+      <form id="room" action="javascript:app.join()">
+        Room: <input class="roomfield" type="text"><input type="submit" value="Join">
       </form>
       <div id='messages'>
       </div>
