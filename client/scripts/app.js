@@ -1,42 +1,8 @@
 var app = {
-	
+	server: 'https://api.parse.com/1/classes/chatterbox',
 	newestTimestamp: null,
 	currentRoom: 'lobby',
 	friends: {},
-
-	fetch : function(query) {
-		$.ajax({
-		  url: 'https://api.parse.com/1/classes/chatterbox',
-		  type: 'GET',
-		  data: query,
-		  contentType: 'application/json',
-		  success: this.displayMessages,
-		  error: function (data) {
-		    console.error('chatterbox: Failed to send message');
-		  }
-		});
-	},
-
-	send : function(message, username) {
-		$.ajax({
-		  url: 'https://api.parse.com/1/classes/chatterbox',
-		  type: 'POST',
-		  data: JSON.stringify({username:username, text:message, roomname:app.currentRoom}),
-		  contentType: 'application/json',
-		  success: function (data) {
-		    console.log('chatterbox: Message sent');
-		  },
-		  error: function (data) {
-		    console.error('chatterbox: Failed to send message');
-		  }
-		});
-	},
-
-	submit : function() {
-		app.send($('input.postfield').val(), window.location.search.slice(10));
-		$('.postfield').val('');
-		setTimeout(app.update.bind(app),50);
-	},
 
 	init : function() {
 		app.update();
@@ -52,6 +18,44 @@ var app = {
 		});
 	},
 
+	fetch : function(query) {
+		$.ajax({
+		  url: app.server,
+		  type: 'GET',
+		  data: query,
+		  contentType: 'application/json',
+		  success: this.displayMessages,
+		  error: function (data) {
+		    console.error('chatterbox: Failed to send message');
+		  }
+		});
+	},
+
+	send : function(message) {
+		$.ajax({
+		  url: app.server,
+		  type: 'POST',
+		  data: JSON.stringify(message),
+		  contentType: 'application/json',
+		  success: function (data) {
+		    console.log('chatterbox: Message sent');
+		  },
+		  error: function (data) {
+		    console.error('chatterbox: Failed to send message');
+		  }
+		});
+	},
+
+	submit : function() {
+		app.send({
+			username: window.location.search.slice(10),
+			text: $('input.postfield').val(),
+			roomname: app.currentRoom
+		});
+		$('.postfield').val('');
+		setTimeout(app.update.bind(app),50);
+	},
+
 	// data.results[i] has properties: createdAt, objectId, roomname, text, updatedAt, username
 	displayMessages : function(data) {
 		for (var i = data.results.length-1; i >= 0; i--) {
@@ -61,7 +65,7 @@ var app = {
 				if( app.friends[message.username] ) {
 					spanClass = '<span class="username friend">'
 				}
-				$('#messages').prepend('<div class="chat">' + spanClass + html_sanitize(message.username) + '</span>' + ': ' + html_sanitize(message.text) + '</div>');
+				$('#chats').prepend('<div class="chat">' + spanClass + html_sanitize(message.username) + '</span>' + ': ' + html_sanitize(message.text) + '</div>');
 			}
 		}
 		if (data.results.length>0) {
@@ -76,11 +80,15 @@ var app = {
 		else this.fetch({order:'-createdAt', where:{roomname: app.currentRoom}, limit:100})
 	},
 
+	clearMessages : function() {
+		$('#chats').empty();
+	},
+
 	join : function() {
 		app.currentRoom = html_sanitize($('input.roomfield').val());
 		$('.roomfield').val('');
 		app.newestTimestamp = null;
-		$('.chat').remove();
+		app.clearMessages();
 		app.update();
 	}
 
